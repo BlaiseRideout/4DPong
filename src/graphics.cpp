@@ -281,6 +281,7 @@ void Graphics::initGlfw(bool fullscreen) {
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 1);
   //user can't resize window
   glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE, GL_TRUE);
+  glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4); // 4x antialiasing
 
   //open glfw window
   if (!glfwOpenWindow(this->width, this->height, 8, 8, 8, 8, 8, 8, fullscreen ? GLFW_FULLSCREEN : GLFW_WINDOW))

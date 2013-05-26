@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "ball.hpp"
 #include "graphics.hpp"
 
@@ -35,10 +37,14 @@ void Ball::update(Paddle p1, Paddle p2) {
 
   if(this->position.w < p1.pos.w - 0.2f) {
     p2.score++;
+    std::cout << std::endl << "Player 2 score!" << std::endl;
+    std::cout << "Player 1: " << p1.score << " Player 2: " << p2.score << std::endl;
     reset();
   }
   if(this->position.w > p2.pos.w + 0.2f) {
     p1.score++;
+    std::cout << std::endl << "Player 1 score!" << std::endl;
+    std::cout << "Player 1: " << p1.score << " Player 2: " << p2.score << std::endl;
     reset();
   }
 
