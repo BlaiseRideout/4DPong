@@ -6,11 +6,14 @@
 class Paddle {
   public:
     glm::vec4 pos;
+    int score;
 
-    Paddle();
+    Paddle(char, char, char, char, char, char, float);
 
     void update();
     void draw(Graphics);
+  private:
+    char upKey, downKey, leftKey, rightKey, inKey, outKey;
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include <GL/glfw.h>
+#include <time.h>
 
 Game::Game() {
   this->running = true;
@@ -7,15 +8,6 @@ Game::Game() {
 
 void Game::update() {
   running = running && glfwGetKey('Q') == GLFW_RELEASE;
-
-  if(glfwGetKey('A') != GLFW_RELEASE)
-    this->graphics.cameraPosition.x += 0.05;
-  if(glfwGetKey('E') != GLFW_RELEASE)
-    this->graphics.cameraPosition.x -= 0.05;
-  if(glfwGetKey(',') != GLFW_RELEASE)
-    this->graphics.cameraPosition.y += 0.05;
-  if(glfwGetKey('O') != GLFW_RELEASE)
-    this->graphics.cameraPosition.y -= 0.05;
   
   this->level.update();
 }
@@ -28,7 +20,9 @@ void Game::draw() {
 }
 
 void Game::init() {
-  this->graphics.init(1024, 768, false);
+  this->graphics.init(1280, 720, false);
+
+  srand(time(NULL));
 }
 
 void Game::run() {

@@ -17,18 +17,29 @@ Graphics::Graphics() {
   this->cameraPosition.x = -2.0f;
   this->cameraPosition.y = 2.0f;
   this->cameraPosition.z = -2.0f;
+  this->cameraRotation = 0;
 }
 
-void Graphics::drawCube(float shade, glm::vec3 center, float size) {
+void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), center) * glm::scale(glm::mat4(1.0f), glm::vec3(size));
 
-  glm::mat4 MVP = this->projection * this->view * model;
+  GLuint MID = glGetUniformLocation(this->shaderprogram, "M");
+  glUniformMatrix4fv(MID, 1, GL_FALSE, &model[0][0]);
 
-  GLuint MatrixID = glGetUniformLocation(this->shaderprogram, "MVP");
-  glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+  GLuint VID = glGetUniformLocation(this->shaderprogram, "V");
+  glUniformMatrix4fv(VID, 1, GL_FALSE, &this->view[0][0]);
 
-  //GLuint shadeID = glGetUniformLocation(this->shaderprogram, "in_Color");
-  //glUniform1f(shadeID, shade);
+  GLuint PID = glGetUniformLocation(this->shaderprogram, "P");
+  glUniformMatrix4fv(PID, 1, GL_FALSE, &this->projection[0][0]);
+
+  GLuint shadeID = glGetUniformLocation(this->shaderprogram, "in_Color");
+  glUniform1f(shadeID, shade);
+
+  GLuint alphaID = glGetUniformLocation(this->shaderprogram, "in_Alpha");
+  glUniform1f(alphaID, alpha);
+
+  GLuint cameraID = glGetUniformLocation(this->shaderprogram, "cameraPosition");
+  glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, this->cubeBuffer);
@@ -41,7 +52,7 @@ void Graphics::drawCube(float shade, glm::vec3 center, float size) {
      (void*)0            // array buffer offset
   );
    
-  /*glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, this->cubeNormals);
   glVertexAttribPointer(
       1,                                // attribute
@@ -50,7 +61,7 @@ void Graphics::drawCube(float shade, glm::vec3 center, float size) {
       GL_FALSE,                         // normalized?
       0,                                // stride
       (void*)0                          // array buffer offset
-  ); */
+  );
 
   glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
    
@@ -62,11 +73,17 @@ void Graphics::prepareContext() {
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
+  glm::vec4 cameraPosition = glm::rotate(glm::mat4(1.0f), this->cameraRotation, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(this->cameraPosition, 0.0f);
+  this->cameraRotation += 0.03;
+  if(this->cameraRotation >= 360)
+    this->cameraRotation -= 360;
+
   this->view = glm::lookAt(
     glm::vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z), // camera position
     glm::vec3(0,0,0), // look at
     glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
   );
+
 }
 
 void Graphics::init(int width, int height, bool fullscreen) {
@@ -124,12 +141,12 @@ void Graphics::initBuffers() {
     1.0f, -1.0f, 1.01f
   };
 
-  /*static GLfloat g_vertex_normal_data[3 * 12];
+  static GLfloat g_vertex_normal_data[3 * 12 * 3];
 
-  for(int i = 0; i < 12 * 3; i += 9) {
+  for(int i = 0; i < 12 * 3; i += 3) {
     glm::vec3 normal = glm::cross(
-      glm::vec3(g_vertex_buffer_data[i * 3], g_vertex_buffer_data[i * 3 + 1], g_vertex_buffer_data[i * 3 + 2]) - glm::vec3(g_vertex_buffer_data[i * 3 + 3], g_vertex_buffer_data[i * 3 + 4], g_vertex_buffer_data[i * 3 + 5]),
-      glm::vec3(g_vertex_buffer_data[i * 3], g_vertex_buffer_data[i * 3 + 1], g_vertex_buffer_data[i * 3 + 2]) - glm::vec3(g_vertex_buffer_data[i * 3 + 6], g_vertex_buffer_data[i * 3 + 7], g_vertex_buffer_data[i * 3 + 8]));
+      glm::vec3(g_vertex_buffer_data[i * 3 + 3], g_vertex_buffer_data[i * 3 + 4], g_vertex_buffer_data[i * 3 + 5]) - glm::vec3(g_vertex_buffer_data[i * 3], g_vertex_buffer_data[i * 3 + 1], g_vertex_buffer_data[i * 3 + 2]),
+      glm::vec3(g_vertex_buffer_data[i * 3 + 6], g_vertex_buffer_data[i * 3 + 7], g_vertex_buffer_data[i * 3 + 8]) - glm::vec3(g_vertex_buffer_data[i * 3], g_vertex_buffer_data[i * 3 + 1], g_vertex_buffer_data[i * 3 + 2]));
 
     g_vertex_normal_data[i * 3] = normal.x;
     g_vertex_normal_data[i * 3 + 1] = normal.y;
@@ -142,7 +159,7 @@ void Graphics::initBuffers() {
     g_vertex_normal_data[i * 3 + 6] = normal.x;
     g_vertex_normal_data[i * 3 + 7] = normal.y;
     g_vertex_normal_data[i * 3 + 8] = normal.z;
-  }*/
+  }
 
   // Generate 1 buffer, put the resulting identifier in vertexbuffer
   glGenBuffers(1, &this->cubeBuffer);
@@ -153,10 +170,9 @@ void Graphics::initBuffers() {
   // Give our vertices to OpenGL.
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-
-  //glGenBuffers(2, &this->cubeNormals);
-  //glBindBuffer(GL_ARRAY_BUFFER, this->cubeNormals);
-  //glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_normal_data), g_vertex_normal_data, GL_STATIC_DRAW);
+  glGenBuffers(1, &this->cubeNormals);
+  glBindBuffer(GL_ARRAY_BUFFER, this->cubeNormals);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_normal_data), g_vertex_normal_data, GL_STATIC_DRAW);
 }
 
 void Graphics::initShaders(const char *vertex_file_path, const char *fragment_file_path){
@@ -242,7 +258,7 @@ void Graphics::initGL() {
   if (GLEW_OK != err)
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
 
-  glClearColor(0.01f, 0.01f, 0.01f, 0.0f);
+  glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
   glViewport(0, 0, this->width, this->height);
 
   glEnable(GL_DEPTH_TEST);

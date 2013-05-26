@@ -1,7 +1,9 @@
 #include "level.hpp"
 
-Level::Level() {
-  
+Level::Level() : 
+p1(',', 'O', 'A', 'E', '\'', '.', -1.0f),
+p2('C', 'T', 'H', 'N', 'G', 'R', 1.0f) {
+
 }
 
 void Level::draw(Graphics g) {
@@ -11,7 +13,7 @@ void Level::draw(Graphics g) {
 }
 
 void Level::update() {
-  this->ball.update();
   this->p1.update();
   this->p2.update();
+  this->ball.update(p1, p2);
 }

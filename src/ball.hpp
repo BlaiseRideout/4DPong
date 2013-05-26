@@ -2,6 +2,7 @@
 #define BALL_H
 
 #include "graphics.hpp"
+#include "paddle.hpp"
 
 class Ball {
   public:
@@ -9,8 +10,9 @@ class Ball {
     glm::vec4 velocity;
 
     Ball();
+    void reset();
     void draw(Graphics);
-    void update();
+    void update(Paddle, Paddle);
 };
 
 #endif

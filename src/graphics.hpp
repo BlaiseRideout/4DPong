@@ -9,10 +9,11 @@
 class Graphics {
   public:
     glm::vec3 cameraPosition;
+    float cameraRotation;
 
     Graphics();
 
-    void drawCube(float, glm::vec3, float);
+    void drawCube(float, float, glm::vec3, float);
     void prepareContext();
     void init(int, int, bool);
     void clearScreen();
