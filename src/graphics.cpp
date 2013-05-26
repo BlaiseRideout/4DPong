@@ -20,10 +20,6 @@ Graphics::Graphics() {
   this->cameraRotation = 0;
 }
 
-void Graphics::drawText(std::string text) {
-  
-}
-
 void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), center) * glm::scale(glm::mat4(1.0f), glm::vec3(size));
 
