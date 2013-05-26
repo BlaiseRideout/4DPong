@@ -20,7 +20,7 @@ void Game::draw() {
 }
 
 void Game::init() {
-  this->graphics.init(1280, 720, false);
+  this->graphics.init(1280, 600, false);
 
   srand(time(NULL));
 }

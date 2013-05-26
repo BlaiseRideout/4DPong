@@ -13,6 +13,7 @@ class Graphics {
 
     Graphics();
 
+    void drawText(std::string);
     void drawCube(float, float, glm::vec3, float);
     void prepareContext();
     void init(int, int, bool);

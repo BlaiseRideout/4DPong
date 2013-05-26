@@ -14,10 +14,14 @@
 extern const GLubyte  *gluErrorString(GLenum error);
 
 Graphics::Graphics() {
-  this->cameraPosition.x = -2.0f;
-  this->cameraPosition.y = 2.0f;
-  this->cameraPosition.z = -2.0f;
+  this->cameraPosition.x = -2.7f;
+  this->cameraPosition.y = 1.0f;
+  this->cameraPosition.z = -2.7f;
   this->cameraRotation = 0;
+}
+
+void Graphics::drawText(std::string text) {
+  
 }
 
 void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
