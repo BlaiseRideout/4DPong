@@ -52,4 +52,6 @@ void Ball::update(Paddle p1, Paddle p2) {
       this->position.z > p2.pos.z - 0.2f && this->position.z < p2.pos.z + 0.2f)) {
     this->velocity.w *= -1;
   }
+
+  this->position += this->velocity;
 }

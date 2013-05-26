@@ -20,11 +20,123 @@ Graphics::Graphics() {
   this->cameraRotation = 0;
 }
 
-void Graphics::drawText(std::string text) {
-  
+void Graphics::drawText(glm::vec2 pos, std::string text) {
+  glm::mat4 mat = glm::ortho(0.0f, (float)this->width, 0.0f, (float)this->height, -1.0f, 1.0f);
+  //mat = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)) * mat;
+
+  std::vector<float> vertexBuf;
+  std::vector<float> uvBuf;
+
+  for(unsigned int i = 0; i < text.length(); ++i) {
+    char a = text[i];
+    if(a < '0' || a > '9')
+      continue;
+
+    float texX = (float)(a - '0') / 10.0f;
+
+    uvBuf.push_back((texX + .1f) * (250 / 256));
+    uvBuf.push_back(0.0f);
+
+    uvBuf.push_back((texX + .1f) * (250 / 256));
+    uvBuf.push_back(50.0f / 64.0f);
+
+    uvBuf.push_back(texX * (250 / 256));
+    uvBuf.push_back(0.0f);
+
+    uvBuf.push_back((texX + .1f) * (250 / 256));
+    uvBuf.push_back(50.0f / 64.0f);
+
+    uvBuf.push_back(texX * (250 / 256));
+    uvBuf.push_back(50.0f / 64.0f);
+
+    uvBuf.push_back(texX * (250 / 256));
+    uvBuf.push_back(0.0f);
+
+    int x, y;
+    if(vertexBuf.size() > 0) {
+      x = vertexBuf[vertexBuf.size() - 2] + 1;
+      y = vertexBuf[vertexBuf.size() - 1] + 1;
+    }
+    else {
+      x = 0;
+      y = 0;
+    }
+
+    vertexBuf.push_back(x + 25);
+    vertexBuf.push_back(y);
+
+    vertexBuf.push_back(x + 25);
+    vertexBuf.push_back(y + 50);
+
+    vertexBuf.push_back(x);
+    vertexBuf.push_back(y);
+
+    vertexBuf.push_back(x + 25);
+    vertexBuf.push_back(y + 50);
+
+    vertexBuf.push_back(x);
+    vertexBuf.push_back(y + 50);
+
+    vertexBuf.push_back(x);
+    vertexBuf.push_back(y);
+  }
+
+  GLuint vertices;
+  glGenBuffers(1, &vertices);
+  glBindBuffer(GL_ARRAY_BUFFER, vertices);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexBuf.size(), &vertexBuf[0], GL_STATIC_DRAW);
+
+  GLuint UVs;
+  glGenBuffers(1, &UVs);
+  glBindBuffer(GL_ARRAY_BUFFER, UVs);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * uvBuf.size(), &uvBuf[0], GL_STATIC_DRAW);
+
+
+  glUseProgram(this->textProgram);
+  GLuint VertexArrayID;
+  glGenVertexArrays(1, &VertexArrayID);
+  glBindVertexArray(VertexArrayID);
+
+  GLuint posID = glGetUniformLocation(this->textProgram, "pos");
+  glUniform2f(posID, pos.x, pos.y);
+
+  GLuint matID = glGetUniformLocation(this->textProgram, "mat");
+  glUniformMatrix4fv(matID, 1, GL_FALSE, &mat[0][0]);  
+
+  GLuint texID = glGetUniformLocation(this->textProgram, "tex");
+  glUniform1iARB(texID, this->textTex);
+
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, vertices);
+  glVertexAttribPointer(
+     0,                  // attribute 0
+     2,                  // size
+     GL_FLOAT,           // type
+     GL_FALSE,           // normalized?
+     0,                  // stride
+     (void*)0            // array buffer offset
+  );
+   
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, UVs);
+  glVertexAttribPointer(
+      1,                                // attribute
+      2,                                // size
+      GL_FLOAT,                         // type
+      GL_FALSE,                         // normalized?
+      0,                                // stride
+      (void*)0                          // array buffer offset
+  );
+
+  glDrawArrays(GL_TRIANGLES, 0, vertexBuf.size() / 2);
+   
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 }
 
 void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
+  this->prepareContext();
+
   glm::mat4 model = glm::translate(glm::mat4(1.0f), center) * glm::scale(glm::mat4(1.0f), glm::vec3(size));
 
   GLuint MID = glGetUniformLocation(this->shaderprogram, "M");
@@ -70,17 +182,16 @@ void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) 
   glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
    
   glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 }
 
 void Graphics::prepareContext() {
+  glUseProgram(this->shaderprogram);
   GLuint VertexArrayID;
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
   glm::vec4 cameraPosition = glm::rotate(glm::mat4(1.0f), this->cameraRotation, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(this->cameraPosition, 0.0f);
-  this->cameraRotation += 0.03;
-  if(this->cameraRotation >= 360)
-    this->cameraRotation -= 360;
 
   this->view = glm::lookAt(
     glm::vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z), // camera position
@@ -97,12 +208,18 @@ void Graphics::init(int width, int height, bool fullscreen) {
   this->initGlfw(fullscreen);
   this->initGL();
   this->prepareContext();
-  this->initShaders("res/screen.vert", "res/screen.frag");
+  this->initShaders();
   this->initBuffers();
+
+  this->initFont();
 }
 
 void Graphics::clearScreen() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Graphics::initFont() {
+  this->textTex = loadBitmap("res/font.bmp");
 }
 
 void Graphics::initBuffers() {
@@ -179,8 +296,13 @@ void Graphics::initBuffers() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_normal_data), g_vertex_normal_data, GL_STATIC_DRAW);
 }
 
-void Graphics::initShaders(const char *vertex_file_path, const char *fragment_file_path){
-    // Create the shaders
+void Graphics::initShaders(){
+    this->shaderprogram = loadShader("res/screen.vert", "res/screen.frag");
+    this->textProgram = loadShader("res/text.vert", "res/text.frag");
+}
+
+GLuint Graphics::loadShader(const char *vertex_file_path, const char *fragment_file_path) {
+      // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
  
@@ -250,11 +372,8 @@ void Graphics::initShaders(const char *vertex_file_path, const char *fragment_fi
  
     glDeleteShader(VertexShaderID);
     glDeleteShader(FragmentShaderID);
- 
-    this->shaderprogram = ProgramID;
 
-
-    glUseProgram(this->shaderprogram);
+    return ProgramID;
 }
 
 void Graphics::initGL() {
@@ -265,11 +384,14 @@ void Graphics::initGL() {
   glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
   glViewport(0, 0, this->width, this->height);
 
+  glEnable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   glEnable(GL_MULTISAMPLE);
   glDisable(GL_CULL_FACE);
   glShadeModel(GL_SMOOTH);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Projection matrix : 45° Field of View, correct aspect ratio, display range : 0.1 unit <-> 100 units
   this->projection = glm::perspective(45.0f, (float)this->width / (float)this->height, 0.1f, 100.0f);
@@ -301,4 +423,63 @@ void Graphics::initGlfw(bool fullscreen) {
   glfwSwapInterval(1);
 
   std::cout << glGetString(GL_VERSION) << std::endl;
+}
+
+GLuint Graphics::loadBitmap(const char * imagepath) {
+  // Data read from the header of the BMP file
+  unsigned char header[54]; // Each BMP file begins by a 54-bytes header
+  unsigned int dataPos;     // Position in the file where the actual data begins
+  unsigned int width, height;
+  unsigned int imageSize;   // = width*height*3
+  // Actual RGB data
+  unsigned char * data;
+
+  // Open the file
+  FILE * file = fopen(imagepath,"rb");
+  if (!file) {
+    throw std::runtime_error("Couldn't load image");
+  }
+
+  if(fread(header, 1, 54, file) != 54) { // If not 54 bytes read : problem
+    throw std::runtime_error("File not a bmp file");
+  }
+
+  if ( header[0]!='B' || header[1]!='M' ) {
+    throw std::runtime_error("File not a bmp file");
+  }
+
+  // Read ints from the byte array
+  dataPos    = *(int*)&(header[0x0A]);
+  imageSize  = *(int*)&(header[0x22]);
+  width      = *(int*)&(header[0x12]);
+  height     = *(int*)&(header[0x16]);
+
+  // Some BMP files are misformatted, guess missing information
+  if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
+  if (dataPos==0)      dataPos=54; // The BMP header is done that way
+
+  // Create a buffer
+  data = new unsigned char [imageSize];
+   
+  // Read the actual data from the file into the buffer
+  if(fread(data,1,imageSize,file) != imageSize)
+    throw std::runtime_error("Corrupt bmp file");
+   
+  //Everything is in memory now, the file can be closed
+  fclose(file);
+
+  // Create one OpenGL texture
+  GLuint textureID;
+  glGenTextures(1, &textureID);
+   
+  // "Bind" the newly created texture : all future texture functions will modify this texture
+  glBindTexture(GL_TEXTURE_2D, textureID);
+   
+  // Give the image to OpenGL
+  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+   
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+  return textureID;
 }

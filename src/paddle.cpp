@@ -13,6 +13,7 @@ Paddle::Paddle(char upKey, char downKey, char leftKey, char rightKey, char inKey
   this->pos.x     = w;
   this->pos.y     = w;
   this->pos.z     = w;
+  this->score     = 0;
 }
 
 void Paddle::update() {
