@@ -7,7 +7,7 @@ Game::Game() {
 }
 
 void Game::update() {
-  running = running && glfwGetKey('Q') == GLFW_RELEASE;
+  running = running && glfwGetKey(GLFW_KEY_ESC) == GLFW_RELEASE;
   
   this->level.update();
 }

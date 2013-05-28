@@ -13,11 +13,11 @@
 
 extern const GLubyte  *gluErrorString(GLenum error);
 
+glm::vec3 Graphics::cameraPosition = glm::vec3(-2.7f, 1.0f, -2.7f);
+float Graphics::cameraRotation = 0.0f;
+
 Graphics::Graphics() {
-  this->cameraPosition.x = -2.7f;
-  this->cameraPosition.y = 1.0f;
-  this->cameraPosition.z = -2.7f;
-  this->cameraRotation = 0;
+
 }
 
 void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
@@ -39,7 +39,7 @@ void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) 
   glUniform1f(alphaID, alpha);
 
   GLuint cameraID = glGetUniformLocation(this->shaderprogram, "cameraPosition");
-  glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+  glUniform3f(cameraID, Graphics::cameraPosition.x, Graphics::cameraPosition.y, Graphics::cameraPosition.z);
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, this->cubeBuffer);
@@ -51,7 +51,7 @@ void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) 
      0,                  // stride
      (void*)0            // array buffer offset
   );
-   
+
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, this->cubeNormals);
   glVertexAttribPointer(
@@ -73,10 +73,10 @@ void Graphics::prepareContext() {
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
-  glm::vec4 cameraPosition = glm::rotate(glm::mat4(1.0f), this->cameraRotation, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(this->cameraPosition, 0.0f);
-  this->cameraRotation += 0.03;
-  if(this->cameraRotation >= 360)
-    this->cameraRotation -= 360;
+  glm::vec4 cameraPosition = glm::rotate(glm::mat4(1.0f), Graphics::cameraRotation, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(Graphics::cameraPosition, 0.0f);
+  Graphics::cameraRotation += 0.03;
+  if(Graphics::cameraRotation >= 360)
+    Graphics::cameraRotation -= 360;
 
   this->view = glm::lookAt(
     glm::vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z), // camera position

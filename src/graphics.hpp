@@ -4,12 +4,10 @@
 #include <GL/gl.h>
 #include <glm/glm.hpp>
 
-#include "vector.hpp"
-
 class Graphics {
   public:
-    glm::vec3 cameraPosition;
-    float cameraRotation;
+    static glm::vec3 cameraPosition;
+    static float cameraRotation;
 
     Graphics();
 
