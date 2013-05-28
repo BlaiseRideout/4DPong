@@ -10,8 +10,8 @@ static std::string digit2str(short digit);
 
 
 Level::Level() : 
-p1(',', 'O', 'A', 'E', '\'', '.', -1.0f),
-p2('C', 'T', 'H', 'N', 'G', 'R', 1.0f) {
+p1('W', 'S', 'A', 'D', 'Q', 'E', -1.0f),
+p2('I', 'K', 'J', 'L', 'U', 'O', 1.0f) {
 
 }
 
