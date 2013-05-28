@@ -26,8 +26,8 @@ void Paddle::update() {
     glm::normalize(direction);
     glm::vec4 direction4 = glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(0, 1, 0)) * glm::vec4(direction, 1.0f);
     glm::normalize(direction4);
-    this->pos.z += 0.02 * direction4.z;
-    this->pos.x += 0.02 * direction4.x;
+    this->pos.z -= 0.02 * direction4.z;
+    this->pos.x -= 0.02 * direction4.x;
   }
   if(glfwGetKey(this->leftKey) != GLFW_RELEASE) {
     glm::vec4 cameraPosition = glm::rotate(glm::mat4(1.0f), Graphics::cameraRotation, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(Graphics::cameraPosition, 0.0f);
@@ -36,8 +36,8 @@ void Paddle::update() {
     glm::normalize(direction);
     glm::vec4 direction4 = glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(0, 1, 0)) * glm::vec4(direction, 1.0f);
     glm::normalize(direction4);
-    this->pos.x -= 0.02 * direction4.x;
-    this->pos.z -= 0.02 * direction4.z;
+    this->pos.x += 0.02 * direction4.x;
+    this->pos.z += 0.02 * direction4.z;
   }
 
   if(glfwGetKey(this->inKey) != GLFW_RELEASE) {
