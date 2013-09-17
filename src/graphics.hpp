@@ -11,7 +11,7 @@ class Graphics {
 
     Graphics();
 
-    void drawCube(float, float, glm::vec3, float);
+    void drawCube(float, glm::vec3, float);
     void prepareContext();
     void init(int, int, bool);
     void clearScreen();

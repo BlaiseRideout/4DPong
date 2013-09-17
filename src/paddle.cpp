@@ -58,9 +58,9 @@ void Paddle::update() {
   }
 
   if(glfwGetKey(this->upKey) != GLFW_RELEASE)
-    this->pos.y += 0.01;
+    this->pos.y += 0.03;
   if(glfwGetKey(this->downKey) != GLFW_RELEASE)
-    this->pos.y -= 0.01;
+    this->pos.y -= 0.03;
 
   if(this->pos.x > 1)
     this->pos.x = 1;
@@ -79,5 +79,5 @@ void Paddle::update() {
 }
 
 void Paddle::draw(Graphics g) {
-  g.drawCube((1 + pos.w) / 2.0f, 1.0f, glm::vec3(pos.x, pos.y, pos.z), .2f);
+  g.drawCube((1 + pos.w) / 2.0f, glm::vec3(pos.x, pos.y, pos.z), .2f);
 }

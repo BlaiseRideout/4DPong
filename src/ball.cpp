@@ -20,7 +20,7 @@ void Ball::reset() {
 }
 
 void Ball::draw(Graphics g) {
-  g.drawCube((1 + position.w) / 2.0f, 1.0f, glm::vec3(position.x, position.y, position.z), .03f);
+  g.drawCube((1 + position.w) / 2.0f, glm::vec3(position.x, position.y, position.z), .03f);
 }
 
 void Ball::update(Paddle p1, Paddle p2) {

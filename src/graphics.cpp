@@ -20,7 +20,7 @@ Graphics::Graphics() {
 
 }
 
-void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) {
+void Graphics::drawCube(float shade, glm::vec3 center, float size) {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), center) * glm::scale(glm::mat4(1.0f), glm::vec3(size));
 
   GLuint MID = glGetUniformLocation(this->shaderprogram, "M");
@@ -34,9 +34,6 @@ void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) 
 
   GLuint shadeID = glGetUniformLocation(this->shaderprogram, "in_Color");
   glUniform1f(shadeID, shade);
-
-  GLuint alphaID = glGetUniformLocation(this->shaderprogram, "in_Alpha");
-  glUniform1f(alphaID, alpha);
 
   GLuint cameraID = glGetUniformLocation(this->shaderprogram, "cameraPosition");
   glUniform3f(cameraID, Graphics::cameraPosition.x, Graphics::cameraPosition.y, Graphics::cameraPosition.z);
@@ -64,7 +61,7 @@ void Graphics::drawCube(float shade, float alpha, glm::vec3 center, float size) 
   );
 
   glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
-   
+
   glDisableVertexAttribArray(0);
 }
 
